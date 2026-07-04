@@ -52,7 +52,5 @@ Write-Host "Done: $zipPath ($sizeMb MB)" -ForegroundColor Green
 Write-Host "ZIP SHA256: $zipHash"
 Write-Host ''
 Write-Host 'Release checklist:' -ForegroundColor Yellow
-Write-Host '  1. Create a GitHub Release, upload the .zip and .sha256, paste hashes into the notes.'
-Write-Host '  2. Update packaging/winget/*.yaml with the version, release URL and ZIP hash,'
-Write-Host '     then PR the three files to github.com/microsoft/winget-pkgs under'
-Write-Host "     manifests/m/ModernWorkspaceHub/AzureVmScriptRunner/$Version/"
+Write-Host "  1. Update CHANGELOG.md and the csproj <Version>, commit, tag v$Version, push --tags."
+Write-Host '  2. Create a GitHub Release, upload the .zip and .sha256, paste hashes into the notes.'
