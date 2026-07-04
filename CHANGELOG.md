@@ -3,6 +3,27 @@
 All notable changes to Azure VM Script Runner. Versions follow SemVer; each
 release is tagged `vX.Y.Z` and published on GitHub Releases as a portable zip.
 
+## [1.0.3] — 2026-07-04
+
+### Added
+
+- **Parallel batches for scheduled executions** — the runbook now starts VMs
+  asynchronously in configurable waves (new *Batch size* field on the Schedule
+  page, default 5) instead of one at a time; 25 ten-minute installs at batch
+  size 5 now take ~50 minutes instead of ~4 hours
+- Per-VM timeout field on the Schedule page
+- Clear button on the Schedule page log
+
+### Changed
+
+- Much richer scheduled-run output: timestamps on every line, batch headers,
+  per-VM start/completion with durations, download source URL and package size,
+  PSADT version detected, install duration, and an end-of-run summary table
+  (per-VM status + totals)
+- The in-guest "managed identity download unavailable (400)" message now
+  explains it simply means the VM has no identity and the next method is tried
+  (it was expected behaviour that read like an error)
+
 ## [1.0.2] — 2026-07-04
 
 ### Added

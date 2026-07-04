@@ -212,6 +212,12 @@
             <TextBlock Text="Expires (optional):" Style="{StaticResource FieldLabel}"/>
             <DatePicker SelectedDate="{Binding ExpiryDate}" Width="125"
                         ToolTip="Last day the schedule may fire; leave empty for no expiry"/>
+            <TextBlock Text="Batch size:" Style="{StaticResource FieldLabel}"/>
+            <TextBox Width="40" Text="{Binding BatchSize}"
+                     ToolTip="How many VMs run at once when the schedule fires (e.g. 25 VMs at 5 = five waves). Each VM keeps its own timeout and result."/>
+            <TextBlock Text="Timeout (min):" Style="{StaticResource FieldLabel}"/>
+            <TextBox Width="45" Text="{Binding TimeoutMinutes}"
+                     ToolTip="Per-VM execution timeout"/>
           </WrapPanel>
 
           <!-- Monthly recurrence (mirrors the Azure portal) -->
@@ -296,10 +302,15 @@
       </Border>
 
       <!-- ═══ Log ═══ -->
-      <Border Grid.Row="3" BorderBrush="{StaticResource Brush.Border}" BorderThickness="1" CornerRadius="3">
-        <TextBox x:Name="LogBox" Style="{StaticResource Input.Log}"
-                 Text="{Binding LogText, Mode=OneWay}" TextChanged="LogBox_TextChanged"/>
-      </Border>
+      <Grid Grid.Row="3">
+        <Border BorderBrush="{StaticResource Brush.Border}" BorderThickness="1" CornerRadius="3">
+          <TextBox x:Name="LogBox" Style="{StaticResource Input.Log}"
+                   Text="{Binding LogText, Mode=OneWay}" TextChanged="LogBox_TextChanged"/>
+        </Border>
+        <Button Content="Clear" Style="{StaticResource Button.Tool}" FontSize="11" Padding="8,2"
+                HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,6,10,0"
+                Command="{Binding ClearLogCommand}"/>
+      </Grid>
     </Grid>
   </ScrollViewer>
 </UserControl>

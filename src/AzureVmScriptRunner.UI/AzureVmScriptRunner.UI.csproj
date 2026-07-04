@@ -21,7 +21,7 @@
     <AssemblyName>AzureVmScriptRunner</AssemblyName>
     <!-- Single source of truth for the app version; Package-Msix.ps1 overrides it
          with its -Version parameter so the package and the UI always agree. -->
-    <Version>1.0.2</Version>
+    <Version>1.0.3</Version>
   </PropertyGroup>
 
   <ItemGroup>

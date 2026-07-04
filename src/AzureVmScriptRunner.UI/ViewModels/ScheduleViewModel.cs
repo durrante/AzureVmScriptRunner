@@ -133,6 +133,13 @@ public sealed partial class ScheduleViewModel : ObservableObject
     [ObservableProperty]
     private DateTime? _expiryDate;
 
+    /// <summary>How many VMs the scheduled run executes at once (batches).</summary>
+    [ObservableProperty]
+    private int _batchSize = 5;
+
+    [ObservableProperty]
+    private int _timeoutMinutes = 60;
+
     [ObservableProperty]
     private bool _isWeekly;
 
@@ -621,6 +628,11 @@ public sealed partial class ScheduleViewModel : ObservableObject
             Payload = payload,
             Targets = targets,
             RequestedBy = _requestedBy,
+            Options = Domain.Execution.ExecutionOptions.Default with
+            {
+                Timeout = TimeSpan.FromMinutes(Math.Clamp(TimeoutMinutes, 5, 90)),
+                MaxParallelism = Math.Clamp(BatchSize, 1, 50)
+            },
             Schedule = new ScheduleDefinition
             {
                 StartTime = startLocal,
@@ -741,6 +753,13 @@ public sealed partial class ScheduleViewModel : ObservableObject
             MessageBoxButton.YesNo,
             access.Granted ? MessageBoxImage.Question : MessageBoxImage.Warning)
             == MessageBoxResult.Yes;
+    }
+
+    [RelayCommand]
+    private void ClearLog()
+    {
+        _logBuilder.Clear();
+        LogText = string.Empty;
     }
 
     private void Log(string text, string level = "INFO")

@@ -57,7 +57,8 @@ public static class PsadtScriptBuilder
                     Write-Output 'AVSR: package downloaded via managed identity.'
                 }
                 catch {
-                    Write-Output "AVSR: managed identity download unavailable ($($_.Exception.Message))."
+                    # A 400 from IMDS simply means this VM has no managed identity — expected.
+                    Write-Output "AVSR: VM managed identity not available (this is fine) — trying the next download method."
                 }
 
                 # Fallback 2 (scheduled runs): short-lived storage token minted by the
@@ -102,26 +103,34 @@ public static class PsadtScriptBuilder
                     }
                 }
 
+                $zipMb = [math]::Round((Get-Item $zipPath).Length / 1MB, 2)
+                Write-Output "AVSR: downloaded $zipMb MB from $blobUrl"
+
                 # --- Extract ---
                 Expand-Archive -Path $zipPath -DestinationPath $workDir -Force
+                $fileCount = @(Get-ChildItem -Path $workDir -Recurse -File).Count
+                Write-Output "AVSR: extracted $fileCount file(s) to $workDir"
 
                 # --- Locate PSADT entry point (v4 first, then v3) ---
                 $entry = Get-ChildItem -Path $workDir -Recurse -Filter 'Invoke-AppDeployToolkit.exe' |
                     Select-Object -First 1
+                $toolkitVersion = 'v4'
                 if (-not $entry) {
                     $entry = Get-ChildItem -Path $workDir -Recurse -Filter 'Deploy-Application.exe' |
                         Select-Object -First 1
+                    $toolkitVersion = 'v3'
                 }
                 if (-not $entry) {
                     throw 'No PSADT entry point (Invoke-AppDeployToolkit.exe or Deploy-Application.exe) found in the package.'
                 }
-                Write-Output "AVSR: executing $($entry.Name) {{arguments}}"
+                Write-Output "AVSR: PSADT $toolkitVersion detected — executing $($entry.Name) {{arguments}}"
 
                 # --- Execute and propagate the exit code ---
+                $stopwatch = [System.Diagnostics.Stopwatch]::StartNew()
                 $process = Start-Process -FilePath $entry.FullName -ArgumentList '{{arguments}}' `
                     -WorkingDirectory $entry.DirectoryName -Wait -PassThru
                 $exitCode = $process.ExitCode
-                Write-Output "AVSR: deployment finished with exit code $exitCode"
+                Write-Output "AVSR: deployment finished with exit code $exitCode after $([int]$stopwatch.Elapsed.TotalSeconds)s"
             }
             catch {
                 Write-Error "AVSR: deployment failed before execution completed: $($_.Exception.Message)"

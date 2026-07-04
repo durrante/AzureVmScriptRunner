@@ -30,6 +30,10 @@ public static class ScheduledRequestSerializer
             displayName = request.DisplayName,
             requestedBy = request.RequestedBy,
             timeoutSeconds = (int)request.Options.Timeout.TotalSeconds,
+            // Runbook executes targets in parallel batches of this size.
+            maxParallelism = Math.Max(1, request.Options.MaxParallelism),
+            // For logging only — the plain blob URL, never a SAS.
+            packageUrl = (request.Payload as PsadtPayload)?.PackageUrl.ToString(),
             // Set when the Automation account uses a user-assigned identity; the
             // sandbox token endpoint needs the client_id to pick it.
             identityClientId,

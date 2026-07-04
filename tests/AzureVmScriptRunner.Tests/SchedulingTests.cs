@@ -163,4 +163,38 @@ public class SchedulingTests
         Assert.DoesNotContain("Connect-AzAccount", RunbookContent.Script);
         Assert.DoesNotContain("Import-Module", RunbookContent.Script);
     }
+
+    [Fact]
+    public void Runbook_parameter_carries_batching_and_package_metadata()
+    {
+        var request = TestData.Request(
+            payload: new PsadtPayload
+            {
+                PackageUrl = new Uri("https://store.blob.core.windows.net/packages/app.zip")
+            },
+            options: ExecutionOptions.Default with { MaxParallelism = 5 });
+
+        var parameter = ScheduledRequestSerializer.ToRunbookParameter(request);
+        using var json = JsonDocument.Parse(
+            Encoding.UTF8.GetString(Convert.FromBase64String(parameter)));
+
+        Assert.Equal(5, json.RootElement.GetProperty("maxParallelism").GetInt32());
+        Assert.Equal("https://store.blob.core.windows.net/packages/app.zip",
+            json.RootElement.GetProperty("packageUrl").GetString());
+
+        // Non-PSADT requests carry no package URL.
+        var plain = ScheduledRequestSerializer.ToRunbookParameter(TestData.Request());
+        using var plainJson = JsonDocument.Parse(Encoding.UTF8.GetString(Convert.FromBase64String(plain)));
+        Assert.Equal(JsonValueKind.Null, plainJson.RootElement.GetProperty("packageUrl").ValueKind);
+    }
+
+    [Fact]
+    public void Runbook_executes_in_batches_and_summarises()
+    {
+        Assert.Contains("maxParallelism", RunbookContent.Script);
+        Assert.Contains("Batch size:", RunbookContent.Script);
+        Assert.Contains("Azure-AsyncOperation", RunbookContent.Script);   // async start + poll
+        Assert.Contains("Summary", RunbookContent.Script);
+        Assert.Contains("TimedOut", RunbookContent.Script);
+    }
 }

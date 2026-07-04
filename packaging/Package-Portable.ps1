@@ -1,13 +1,13 @@
 <#
 .SYNOPSIS
-    Builds the portable (free) distribution: a single-file AzureVmScriptRunner.exe
-    zipped for GitHub Releases, with SHA256 hashes for release notes and winget.
+    Builds the portable distribution: a single-file AzureVmScriptRunner.exe
+    zipped for GitHub Releases, with SHA256 hashes for the release notes.
 
 .DESCRIPTION
     Publishes self-contained single-file win-x64 (no .NET install needed on target
     machines), zips it, and writes a .sha256 file. Unsigned by design — this is the
-    zero-cost distribution channel; users see one SmartScreen prompt on first manual
-    run, and winget installs verify the hash automatically. See README.md.
+    zero-cost distribution channel; users may see one SmartScreen prompt on first
+    run and can verify the published hashes instead. See README.md.
 
 .EXAMPLE
     ./Package-Portable.ps1 -Version 1.0.1
