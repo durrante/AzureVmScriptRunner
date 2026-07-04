@@ -21,3 +21,4 @@ packaging/.tools/
 # AI assistant working files (local handoff notes, not for the public repo)
 CLAUDE.md
 .claude/
+blog-draft.md

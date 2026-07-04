@@ -42,6 +42,10 @@ Everything runs through Azure-native services (Resource Graph, Run Command, Azur
 |---|---|
 | ![Tasks](docs/images/05-tasks.png) | ![History](docs/images/06-history.png) |
 
+| Prep — built-in setup guide | Scheduled run — Azure Automation job output |
+|---|---|
+| ![Prep](docs/images/07-prep.png) | ![Scheduled job](docs/images/08-scheduled-job.png) |
+
 ## Features
 
 - **Discovery** — every Windows VM across all your subscriptions in ~1 second via Azure Resource Graph, with Azure-portal-style multi-select filters (subscription, resource group, region, power state), free-text search, and bulk selection.
