@@ -5,9 +5,9 @@ PackageLocale: en-US
 Publisher: modernworkspacehub.com
 PublisherUrl: https://modernworkspacehub.com
 PackageName: Azure VM Script Runner
-PackageUrl: https://github.com/__REPO__
+PackageUrl: https://github.com/durrante/AzureVmScriptRunner
 License: MIT
-LicenseUrl: https://github.com/__REPO__/blob/main/LICENSE
+LicenseUrl: https://github.com/durrante/AzureVmScriptRunner/blob/main/LICENSE
 ShortDescription: Execute scripts, commands and PSADT deployments on Azure Windows VMs - no RDP required.
 Description: |-
   Administration tool for Azure Windows virtual machines. Discover VMs across
