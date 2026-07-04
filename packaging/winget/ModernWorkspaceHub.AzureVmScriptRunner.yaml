@@ -1,7 +1,0 @@
-# winget version manifest — replace __VERSION__ before submitting to
-# github.com/microsoft/winget-pkgs (manifests/m/ModernWorkspaceHub/AzureVmScriptRunner/__VERSION__/)
-PackageIdentifier: ModernWorkspaceHub.AzureVmScriptRunner
-PackageVersion: __VERSION__
-DefaultLocale: en-US
-ManifestType: version
-ManifestVersion: 1.6.0
