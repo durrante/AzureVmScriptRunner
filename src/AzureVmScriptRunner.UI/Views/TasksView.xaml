@@ -1,0 +1,46 @@
+<UserControl x:Class="AzureVmScriptRunner.UI.Views.TasksView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:AzureVmScriptRunner.UI.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:TasksViewModel}">
+
+  <Grid>
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto"/>
+      <RowDefinition Height="*"/>
+      <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
+
+    <Border Grid.Row="0" Style="{StaticResource Panel.Toolbar}">
+      <WrapPanel VerticalAlignment="Center">
+        <Button Content="▶  Load into Run / Deploy" Style="{StaticResource Button.Primary}"
+                Command="{Binding LoadSelectedCommand}"
+                ToolTip="Loads the task into the Run page (scripts) or Deploy page (PSADT) — you review targets and confirm there. Nothing executes directly from this page."/>
+        <Separator Width="1" Background="{StaticResource Brush.BorderLight}" Margin="10,2"/>
+        <Button Content="New Task" Style="{StaticResource Button.Tool}" Command="{Binding NewTaskCommand}"/>
+        <Button Content="Edit" Style="{StaticResource Button.Tool}" Command="{Binding EditSelectedCommand}"/>
+        <Button Content="Delete" Style="{StaticResource Button.Tool}" Command="{Binding DeleteSelectedCommand}"/>
+      </WrapPanel>
+    </Border>
+
+    <DataGrid Grid.Row="1" ItemsSource="{Binding Tasks}" IsReadOnly="True"
+              SelectedItem="{Binding SelectedTask}" SelectionMode="Single">
+      <DataGrid.Columns>
+        <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="220"/>
+        <DataGridTextColumn Header="Category" Binding="{Binding Category}" Width="120"/>
+        <DataGridTextColumn Header="Type" Binding="{Binding TypeText}" Width="100"/>
+        <DataGridTextColumn Header="Origin" Binding="{Binding Origin}" Width="80"/>
+        <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*"/>
+      </DataGrid.Columns>
+    </DataGrid>
+
+    <Border Grid.Row="2" Background="{StaticResource Brush.Footer}"
+            BorderBrush="{StaticResource Brush.BorderLight}" BorderThickness="0,1,0,0" Padding="12,4">
+      <TextBlock Style="{StaticResource Text.Footer}" TextWrapping="Wrap"
+                 Text="PSADT tasks: create them here via New Task → type 'PSADT Deployment', or on the Deploy page via 'Save as Task'. Scheduling a PSADT task requires one one-time grant — the scheduler's identity needs 'Storage Blob Data Reader' on the package storage account (done automatically at schedule creation if you have rights). VMs themselves need nothing. See the Prep page."/>
+    </Border>
+  </Grid>
+</UserControl>

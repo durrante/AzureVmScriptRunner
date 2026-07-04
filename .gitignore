@@ -1,0 +1,19 @@
+# Build output
+bin/
+obj/
+*.user
+
+# Packaging artifacts (see packaging/.gitignore for detail)
+packaging/staging/
+packaging/staging-portable/
+packaging/output/
+packaging/.tools/
+
+# IDE
+.vs/
+.vscode/
+*.suo
+
+# Local state — never commit
+*.pfx
+*.snk

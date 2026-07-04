@@ -1,0 +1,107 @@
+<UserControl x:Class="AzureVmScriptRunner.UI.Views.PrepView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <UserControl.Resources>
+    <Style x:Key="PrepCard" TargetType="Border" BasedOn="{StaticResource Panel.Banner}">
+      <Setter Property="Margin" Value="0,0,0,10"/>
+      <Setter Property="Background" Value="White"/>
+      <Setter Property="BorderBrush" Value="{StaticResource Brush.BorderLight}"/>
+    </Style>
+    <Style x:Key="PrepBody" TargetType="TextBlock">
+      <Setter Property="TextWrapping" Value="Wrap"/>
+      <Setter Property="Foreground" Value="#444444"/>
+      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="Margin" Value="0,2,0,0"/>
+    </Style>
+    <Style x:Key="PrepCode" TargetType="TextBox" BasedOn="{StaticResource Input.Log}">
+      <Setter Property="Background" Value="#F8F8FF"/>
+      <Setter Property="FontSize" Value="11"/>
+      <Setter Property="Padding" Value="6"/>
+      <Setter Property="Margin" Value="0,4,0,0"/>
+      <Setter Property="TextWrapping" Value="Wrap"/>
+    </Style>
+  </UserControl.Resources>
+
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <StackPanel Margin="20" MaxWidth="860" HorizontalAlignment="Left">
+
+      <TextBlock Text="Preparation &amp; Permissions" Style="{StaticResource Text.SectionHeader}"
+                 FontSize="15" Margin="0,0,0,10"/>
+      <TextBlock Style="{StaticResource PrepBody}" Margin="0,0,0,12"
+                 Text="What your account and environment need before using this tool. Everything here is one-time setup."/>
+
+      <Border Style="{StaticResource PrepCard}">
+        <StackPanel>
+          <TextBlock Text="1 · Azure RBAC — discovering and running scripts on VMs" Style="{StaticResource Text.SectionHeader}" Margin="0"/>
+          <TextBlock Style="{StaticResource PrepBody}"
+                     Text="Your signed-in account needs, on every subscription/resource group containing target VMs:"/>
+          <TextBlock Style="{StaticResource PrepBody}"
+                     Text="• Reader — VM discovery via Azure Resource Graph.&#10;• Virtual Machine Contributor (or a custom role with Microsoft.Compute/virtualMachines/runCommands/* and restart/start actions) — executing scripts and power operations."/>
+          <TextBlock Style="{StaticResource PrepBody}" FontWeight="SemiBold"
+                     Text="Security note: anyone who can run scripts on a VM is effectively an administrator of that VM — scripts execute as SYSTEM. Scope this permission accordingly."/>
+        </StackPanel>
+      </Border>
+
+      <Border Style="{StaticResource PrepCard}">
+        <StackPanel>
+          <TextBlock Text="2 · Storage access — PSADT package deployments" Style="{StaticResource Text.SectionHeader}" Margin="0"/>
+          <TextBlock Style="{StaticResource PrepBody}"
+                     Text="Packages are private blobs; no SAS keys are ever stored. For the automatic 1-hour SAS fallback to work, YOUR account needs a data-plane role on the packages storage account (Owner/Contributor is not enough):"/>
+          <TextBox Style="{StaticResource PrepCode}" Text="az role assignment create --assignee &quot;you@domain.com&quot; --role &quot;Storage Blob Data Reader&quot; --scope &lt;storage-account-resource-id&gt;"/>
+        </StackPanel>
+      </Border>
+
+      <Border Style="{StaticResource PrepCard}">
+        <StackPanel>
+          <TextBlock Text="3 · Optional: VM managed identity — the preferred download path" Style="{StaticResource Text.SectionHeader}" Margin="0"/>
+          <TextBlock Style="{StaticResource PrepBody}"
+                     Text="Enable a system-assigned managed identity on target VMs (VM → Identity → System assigned → On) and grant it Storage Blob Data Reader on the packages account. Deployments then download with no SAS at all. The Identity column on the VMs page shows which VMs have one (✔)."/>
+        </StackPanel>
+      </Border>
+
+      <Border Style="{StaticResource PrepCard}">
+        <StackPanel>
+          <TextBlock Text="4 · VM prerequisites" Style="{StaticResource Text.SectionHeader}" Margin="0"/>
+          <TextBlock Style="{StaticResource PrepBody}"
+                     Text="• VM must be running with a healthy Azure VM guest agent (checked automatically before every execution).&#10;• Outbound HTTPS to Azure Storage is required for package downloads (open networking or appropriate firewall rules).&#10;• The 'Restart Azure VM Guest Agent' built-in task fixes most 'agent not ready' states."/>
+        </StackPanel>
+      </Border>
+
+      <Border Style="{StaticResource PrepCard}">
+        <StackPanel>
+          <TextBlock Text="5 · Scheduling prerequisites (Azure Automation)" Style="{StaticResource Text.SectionHeader}" Margin="0"/>
+          <TextBlock Style="{StaticResource PrepBody}"
+                     Text="The subscription hosting the Automation account must have the Microsoft.Automation resource provider registered. Provisioning does this automatically when it can; if your rights don't allow it, register it once yourself:"/>
+          <TextBox Style="{StaticResource PrepCode}" Text="az provider register --namespace Microsoft.Automation --subscription &lt;subscription-id&gt;"/>
+          <TextBlock Style="{StaticResource PrepBody}"
+                     Text="You also need rights to create a resource group and Automation account in that subscription, and Owner / User Access Administrator if you want the app to grant the runbook identity 'Virtual Machine Contributor' automatically (otherwise grant it manually after provisioning)."/>
+        </StackPanel>
+      </Border>
+
+      <Border Style="{StaticResource PrepCard}">
+        <StackPanel>
+          <TextBlock Text="6 · Running PSADT deployments on a SCHEDULE" Style="{StaticResource Text.SectionHeader}" Margin="0"/>
+          <TextBlock Style="{StaticResource PrepBody}" FontWeight="SemiBold"
+                     Text="One requirement. One time. For the whole environment:"/>
+          <TextBlock Style="{StaticResource PrepBody}"
+                     Text="The Automation account's managed identity (the 'scheduler') must have the 'Storage Blob Data Reader' role on the storage account that holds your PSADT packages."/>
+          <TextBox Style="{StaticResource PrepCode}" Text="az role assignment create --assignee-object-id &lt;automation-identity-principal-id&gt; --assignee-principal-type ServicePrincipal --role &quot;Storage Blob Data Reader&quot; --scope &lt;storage-account-resource-id&gt;"/>
+          <TextBlock Style="{StaticResource PrepBody}"
+                     Text="The app attempts this grant automatically when you create a PSADT schedule (it tells you if it couldn't). How it works: at fire time the scheduler mints a short-lived storage token with its own identity and injects it into each VM's script — so individual VMs need NO managed identities and NO storage permissions, regardless of fleet size. If a VM happens to have its own identity with access, that is used first."/>
+          <TextBlock Style="{StaticResource PrepBody}"
+                     Text="Why not a SAS? A SAS link generated when you create the schedule would already be expired when the schedule fires days later — which is also why ad-hoc SAS links must never be pasted into scheduled tasks."/>
+        </StackPanel>
+      </Border>
+
+      <Border Style="{StaticResource PrepCard}">
+        <StackPanel>
+          <TextBlock Text="7 · Auditing" Style="{StaticResource Text.SectionHeader}" Margin="0"/>
+          <TextBlock Style="{StaticResource PrepBody}"
+                     Text="Every Run Command invocation is recorded in the Azure Activity Log (who, which VM, when) — that is your authoritative audit trail. This app additionally records full detail locally (script content, output, exit codes) in %LOCALAPPDATA%\AzureVmScriptRunner\avsr.db."/>
+        </StackPanel>
+      </Border>
+
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

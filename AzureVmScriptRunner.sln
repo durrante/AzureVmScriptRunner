@@ -1,0 +1,66 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{843E0C61-E5EF-42F4-959F-203576E22218}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureVmScriptRunner.Domain", "src\AzureVmScriptRunner.Domain\AzureVmScriptRunner.Domain.csproj", "{E006E79E-9D3E-4605-8028-B35C8A420501}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureVmScriptRunner.Application", "src\AzureVmScriptRunner.Application\AzureVmScriptRunner.Application.csproj", "{587A4BB1-D0BB-47BF-B234-2292181217BB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureVmScriptRunner.Infrastructure", "src\AzureVmScriptRunner.Infrastructure\AzureVmScriptRunner.Infrastructure.csproj", "{CF0187E1-FB5C-45D7-BFF2-3663554966C6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{4914BFA3-8A38-4611-B4A0-B82D0A0A33E0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureVmScriptRunner.Tests", "tests\AzureVmScriptRunner.Tests\AzureVmScriptRunner.Tests.csproj", "{99AFCA34-DA3A-4148-ABC1-B5F2D1089045}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{E9048569-8081-4A71-BE0C-751E1584283E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureVmScriptRunner.Cli", "tools\AzureVmScriptRunner.Cli\AzureVmScriptRunner.Cli.csproj", "{55A270A6-2D7D-4859-9423-437C64C7E488}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureVmScriptRunner.UI", "src\AzureVmScriptRunner.UI\AzureVmScriptRunner.UI.csproj", "{1F37BA16-9A9B-461F-B55C-442954BD8A81}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E006E79E-9D3E-4605-8028-B35C8A420501}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E006E79E-9D3E-4605-8028-B35C8A420501}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E006E79E-9D3E-4605-8028-B35C8A420501}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E006E79E-9D3E-4605-8028-B35C8A420501}.Release|Any CPU.Build.0 = Release|Any CPU
+		{587A4BB1-D0BB-47BF-B234-2292181217BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{587A4BB1-D0BB-47BF-B234-2292181217BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{587A4BB1-D0BB-47BF-B234-2292181217BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{587A4BB1-D0BB-47BF-B234-2292181217BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF0187E1-FB5C-45D7-BFF2-3663554966C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF0187E1-FB5C-45D7-BFF2-3663554966C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF0187E1-FB5C-45D7-BFF2-3663554966C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF0187E1-FB5C-45D7-BFF2-3663554966C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{99AFCA34-DA3A-4148-ABC1-B5F2D1089045}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{99AFCA34-DA3A-4148-ABC1-B5F2D1089045}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{99AFCA34-DA3A-4148-ABC1-B5F2D1089045}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{99AFCA34-DA3A-4148-ABC1-B5F2D1089045}.Release|Any CPU.Build.0 = Release|Any CPU
+		{55A270A6-2D7D-4859-9423-437C64C7E488}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{55A270A6-2D7D-4859-9423-437C64C7E488}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55A270A6-2D7D-4859-9423-437C64C7E488}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{55A270A6-2D7D-4859-9423-437C64C7E488}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F37BA16-9A9B-461F-B55C-442954BD8A81}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F37BA16-9A9B-461F-B55C-442954BD8A81}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F37BA16-9A9B-461F-B55C-442954BD8A81}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F37BA16-9A9B-461F-B55C-442954BD8A81}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{E006E79E-9D3E-4605-8028-B35C8A420501} = {843E0C61-E5EF-42F4-959F-203576E22218}
+		{587A4BB1-D0BB-47BF-B234-2292181217BB} = {843E0C61-E5EF-42F4-959F-203576E22218}
+		{CF0187E1-FB5C-45D7-BFF2-3663554966C6} = {843E0C61-E5EF-42F4-959F-203576E22218}
+		{99AFCA34-DA3A-4148-ABC1-B5F2D1089045} = {4914BFA3-8A38-4611-B4A0-B82D0A0A33E0}
+		{55A270A6-2D7D-4859-9423-437C64C7E488} = {E9048569-8081-4A71-BE0C-751E1584283E}
+		{1F37BA16-9A9B-461F-B55C-442954BD8A81} = {843E0C61-E5EF-42F4-959F-203576E22218}
+	EndGlobalSection
+EndGlobal

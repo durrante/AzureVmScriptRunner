@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:uap10="http://schemas.microsoft.com/appx/manifest/uap/windows10/10"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  IgnorableNamespaces="uap uap10 rescap">
+
+  <!-- Publisher must exactly match the signing certificate's Subject. -->
+  <Identity
+    Name="ModernWorkspaceHub.AzureVmScriptRunner"
+    Publisher="CN=ModernWorkspaceHub"
+    Version="__VERSION__"
+    ProcessorArchitecture="x64" />
+
+  <Properties>
+    <DisplayName>Azure VM Script Runner</DisplayName>
+    <PublisherDisplayName>modernworkspacehub.com</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+    <Description>Execute scripts, commands and PSADT deployments on Azure Windows VMs — no RDP required.</Description>
+  </Properties>
+
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.26100.0" />
+  </Dependencies>
+
+  <Resources>
+    <Resource Language="en-us" />
+  </Resources>
+
+  <Applications>
+    <Application Id="AzureVmScriptRunner"
+                 Executable="AzureVmScriptRunner.exe"
+                 EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements
+        DisplayName="Azure VM Script Runner"
+        Description="Execute scripts, commands and PSADT deployments on Azure Windows VMs."
+        Square150x150Logo="Assets\Square150x150Logo.png"
+        Square44x44Logo="Assets\Square44x44Logo.png"
+        BackgroundColor="#2D1B69" />
+    </Application>
+  </Applications>
+
+  <Capabilities>
+    <rescap:Capability Name="runFullTrust" />
+  </Capabilities>
+</Package>

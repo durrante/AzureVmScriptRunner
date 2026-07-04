@@ -1,0 +1,305 @@
+<UserControl x:Class="AzureVmScriptRunner.UI.Views.ScheduleView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:AzureVmScriptRunner.UI.ViewModels"
+             mc:Ignorable="d"
+             d:DataContext="{d:DesignInstance Type=vm:ScheduleViewModel}">
+
+  <UserControl.Resources>
+    <Style x:Key="Hint" TargetType="TextBlock">
+      <Setter Property="FontSize" Value="11"/>
+      <Setter Property="Foreground" Value="{StaticResource Brush.TextMuted}"/>
+      <Setter Property="TextWrapping" Value="Wrap"/>
+      <Setter Property="Margin" Value="0,2,0,0"/>
+    </Style>
+    <Style x:Key="FieldLabel" TargetType="TextBlock">
+      <Setter Property="FontSize" Value="11"/>
+      <Setter Property="Foreground" Value="{StaticResource Brush.TextMuted}"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+      <Setter Property="Margin" Value="12,0,4,0"/>
+    </Style>
+  </UserControl.Resources>
+
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <Grid Margin="12">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto"/> <!-- Provision -->
+        <RowDefinition Height="Auto"/> <!-- New schedule -->
+        <RowDefinition Height="Auto"/> <!-- Existing schedules -->
+        <RowDefinition Height="150"/>  <!-- Log -->
+      </Grid.RowDefinitions>
+
+      <!-- ═══ Provisioning ═══ -->
+      <Border Grid.Row="0" Margin="0,0,0,10">
+        <Border.Style>
+          <Style TargetType="Border" BasedOn="{StaticResource Panel.Banner}">
+            <Style.Triggers>
+              <DataTrigger Binding="{Binding IsProvisioned}" Value="False">
+                <Setter Property="Background" Value="#FFF8E1"/>
+                <Setter Property="BorderBrush" Value="{StaticResource Brush.StatusAmber}"/>
+              </DataTrigger>
+            </Style.Triggers>
+          </Style>
+        </Border.Style>
+        <StackPanel>
+          <TextBlock Text="Scheduling infrastructure (Azure Automation)"
+                     Style="{StaticResource Text.SectionHeader}" Margin="0,0,0,2"/>
+          <TextBlock Text="{Binding ProvisionStatus}" TextWrapping="Wrap" FontSize="12" Margin="0,0,0,4"/>
+          <TextBlock Style="{StaticResource Hint}" Margin="0,0,0,6"
+                     Text="Provisioning creates: one resource group, one Automation account with a managed identity, and one shared runbook that executes every schedule (schedules only differ by parameters — no runbook sprawl). The Microsoft.Automation resource provider is registered automatically if needed. Names follow Cloud Adoption Framework abbreviations (rg-, aa-) and are editable below."/>
+
+          <!-- Adopt an environment a colleague already provisioned -->
+          <Border Background="#EDF7ED" BorderBrush="{StaticResource Brush.StatusGreen}" BorderThickness="1"
+                  CornerRadius="3" Padding="8,6" Margin="0,0,0,8"
+                  Visibility="{Binding HasFoundEnvironments, Converter={StaticResource BoolToVis}}">
+            <StackPanel>
+              <TextBlock FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource Brush.StatusGreen}"
+                         Text="Existing AVSR environment(s) found in this tenant — adopt one instead of provisioning a duplicate:"/>
+              <WrapPanel Margin="0,4,0,0">
+                <ComboBox Width="430" ItemsSource="{Binding FoundEnvironments}"
+                          SelectedItem="{Binding SelectedEnvironment}"/>
+                <Button Content="Use existing" Style="{StaticResource Button.Primary}" Margin="8,0,0,0"
+                        Command="{Binding AdoptEnvironmentCommand}"
+                        ToolTip="Runs a deep validation first — managed identity, runbook presence, published state, runbook CONTENT (not just the name), and role assignments — and shows you the full checklist before use."/>
+                <Button Content="Re-scan" Style="{StaticResource Button.Tool}" Margin="6,0,0,0"
+                        Command="{Binding ScanEnvironmentsCommand}"/>
+              </WrapPanel>
+              <CheckBox Content="Show ALL Automation accounts (custom naming conventions)" FontSize="11"
+                        Margin="0,6,0,0" IsChecked="{Binding ShowAllAccounts}"
+                        ToolTip="By default only accounts created by this app are listed. Tick to list every Automation account you can see — adoption still runs the full validation, so an unsuitable account is flagged before use."/>
+            </StackPanel>
+          </Border>
+
+          <WrapPanel Visibility="{Binding IsProvisioned, Converter={StaticResource InverseBoolToVis}}">
+            <TextBlock Text="Subscription:" Style="{StaticResource FieldLabel}" Margin="0,0,4,0"/>
+            <ComboBox Width="300" ItemsSource="{Binding SubscriptionOptions}"
+                      SelectedItem="{Binding ProvisionSubscription}"
+                      ToolTip="All subscriptions you can see — a management subscription works fine; VMs in other subscriptions are reached via role assignment"/>
+            <TextBlock Text="Region:" Style="{StaticResource FieldLabel}"/>
+            <ComboBox Width="120" ItemsSource="{Binding RegionOptions}"
+                      SelectedItem="{Binding ProvisionRegion}"/>
+          </WrapPanel>
+
+          <WrapPanel Margin="0,4,0,0" Visibility="{Binding IsProvisioned, Converter={StaticResource InverseBoolToVis}}">
+            <TextBlock Text="Resource group:" Style="{StaticResource FieldLabel}" Margin="0,0,4,0"/>
+            <TextBox Width="170" Text="{Binding ResourceGroupName}"/>
+            <TextBlock Text="Account name:" Style="{StaticResource FieldLabel}"/>
+            <TextBox Width="130" Text="{Binding AccountName}"/>
+          </WrapPanel>
+
+          <StackPanel Margin="0,6,0,0" Visibility="{Binding IsProvisioned, Converter={StaticResource InverseBoolToVis}}">
+            <Grid Width="440" HorizontalAlignment="Left">
+              <TextBlock Text="Resource tags" FontSize="11" FontWeight="SemiBold"
+                         Foreground="{StaticResource Brush.Brand}" VerticalAlignment="Center"/>
+              <Button Content="+ Add tag" Style="{StaticResource Button.Tool}" FontSize="11" Padding="6,1"
+                      HorizontalAlignment="Right" Command="{Binding AddTagCommand}"/>
+            </Grid>
+            <DataGrid ItemsSource="{Binding Tags}" AutoGenerateColumns="False" Width="440"
+                      HorizontalAlignment="Left" MaxHeight="130" Margin="0,4,0,0"
+                      CanUserAddRows="False" HeadersVisibility="Column">
+              <DataGrid.Columns>
+                <DataGridTextColumn Header="Key" Binding="{Binding Key, UpdateSourceTrigger=PropertyChanged}" Width="150"/>
+                <DataGridTextColumn Header="Value" Binding="{Binding Value, UpdateSourceTrigger=PropertyChanged}" Width="*"/>
+                <DataGridTemplateColumn Width="34">
+                  <DataGridTemplateColumn.CellTemplate>
+                    <DataTemplate>
+                      <Button Content="✕" FontSize="10" Padding="4,0" Style="{StaticResource Button.Tool}"
+                              Command="{Binding DataContext.RemoveTagCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                              CommandParameter="{Binding}"/>
+                    </DataTemplate>
+                  </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+              </DataGrid.Columns>
+            </DataGrid>
+            <TextBlock Style="{StaticResource Hint}" Text="Applied to the resource group and Automation account when provisioning."/>
+          </StackPanel>
+
+          <StackPanel Margin="0,8,0,0" Visibility="{Binding IsProvisioned, Converter={StaticResource InverseBoolToVis}}">
+            <WrapPanel>
+              <TextBlock Text="User-assigned identity (optional):" Style="{StaticResource FieldLabel}" Margin="0,0,4,0"/>
+              <TextBox Width="430" Text="{Binding UserAssignedIdentityId}"/>
+            </WrapPanel>
+            <TextBlock Style="{StaticResource Hint}" Margin="0,2,0,0"
+                       Text="Paste the FULL RESOURCE ID of an existing user-assigned managed identity, e.g. /subscriptions/&lt;sub-id&gt;/resourceGroups/&lt;rg&gt;/providers/Microsoft.ManagedIdentity/userAssignedIdentities/&lt;name&gt; (Identity resource → Properties → Id). Leave empty to create a system-assigned identity instead. A user-assigned identity survives account deletion — its cleanup is your responsibility."/>
+          </StackPanel>
+
+          <WrapPanel Margin="0,6,0,0">
+            <Button Content="Provision" Style="{StaticResource Button.Primary}"
+                    Command="{Binding ProvisionCommand}"
+                    Visibility="{Binding IsProvisioned, Converter={StaticResource InverseBoolToVis}}"/>
+            <Button Content="Scan for existing" Style="{StaticResource Button.Tool}" Margin="6,0,0,0"
+                    Command="{Binding ScanEnvironmentsCommand}"
+                    Visibility="{Binding IsProvisioned, Converter={StaticResource InverseBoolToVis}}"
+                    ToolTip="Looks for scheduling environments already provisioned in this tenant (e.g. by a colleague) so you can adopt one instead of creating a duplicate"/>
+            <Button Content="Re-check" Style="{StaticResource Button.Tool}" Margin="6,0,0,0"
+                    Command="{Binding RefreshStatusCommand}"/>
+            <Button Content="Remove infrastructure" Style="{StaticResource Button.Tool}" Margin="6,0,0,0"
+                    Command="{Binding DeprovisionCommand}"
+                    Visibility="{Binding IsProvisioned, Converter={StaticResource BoolToVis}}"
+                    ToolTip="Deletes the resource group including the Automation account and ALL schedules. A system-assigned identity dies with the account (its stale role assignments should be tidied in IAM); a user-assigned identity is yours to clean up."/>
+          </WrapPanel>
+        </StackPanel>
+      </Border>
+
+      <!-- ═══ New schedule ═══ -->
+      <Border Grid.Row="1" Style="{StaticResource Panel.Banner}" Background="White"
+              BorderBrush="{StaticResource Brush.BorderLight}" Margin="0,0,0,10"
+              IsEnabled="{Binding IsProvisioned}">
+        <StackPanel>
+          <TextBlock Text="New scheduled execution" Style="{StaticResource Text.SectionHeader}" Margin="0,0,0,4"/>
+
+          <TextBlock Text="{Binding TargetsText}" FontWeight="SemiBold" FontSize="12"
+                     Foreground="{StaticResource Brush.Brand}"/>
+          <ItemsControl ItemsSource="{Binding SelectedVmNames}" Margin="0,4,0,6">
+            <ItemsControl.ItemsPanel>
+              <ItemsPanelTemplate>
+                <WrapPanel/>
+              </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Border Background="{StaticResource Brush.PanelLavender}" BorderBrush="{StaticResource Brush.Brand}"
+                        BorderThickness="1" CornerRadius="9" Padding="8,2" Margin="0,2,6,2">
+                  <TextBlock Text="{Binding}" FontSize="11" Foreground="{StaticResource Brush.BrandDark}"/>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+
+          <Grid Margin="0,3">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="90"/>
+              <ColumnDefinition Width="280"/>
+              <ColumnDefinition Width="80"/>
+              <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Label Content="Name *"/>
+            <TextBox Grid.Column="1" Text="{Binding ScheduleName, UpdateSourceTrigger=PropertyChanged}"
+                     ToolTip="Suggested convention: sched-avsr-&lt;what&gt;-&lt;frequency&gt;. Stored in Azure with an AVSR- prefix so app-managed schedules are obvious."/>
+            <Label Content="Source" Grid.Column="2" Margin="12,0,0,0"/>
+            <ComboBox Grid.Column="3" ItemsSource="{Binding SourceOptions}"
+                      SelectedItem="{Binding SelectedSource}"/>
+          </Grid>
+          <TextBlock Style="{StaticResource Hint}"
+                     Text="PSADT deployments can't be typed here ad-hoc: configure them on the Deploy page and use 'Save as Task', then pick the task above. Scheduled PSADT package access: the scheduler's identity mints a fresh storage token when the schedule fires (a SAS created now would have expired) — it needs 'Storage Blob Data Reader' on the package storage account, checked and granted automatically when you create the schedule. VMs need no identities or permissions. Details: Prep page."/>
+
+          <TextBox Height="80" Margin="0,6,0,2" Style="{StaticResource Input.Script}"
+                   Text="{Binding ScriptText, UpdateSourceTrigger=PropertyChanged}"
+                   Visibility="{Binding IsCustomSource, Converter={StaticResource BoolToVis}}"
+                   ToolTip="PowerShell to run on every target VM at the scheduled time"/>
+
+          <WrapPanel Margin="0,4">
+            <TextBlock Text="Start date:" Style="{StaticResource FieldLabel}" Margin="0,0,4,0"/>
+            <DatePicker SelectedDate="{Binding StartDate}" Width="125"/>
+            <TextBlock Text="Time (24h):" Style="{StaticResource FieldLabel}"/>
+            <TextBox Width="55" Text="{Binding StartTime}"
+                     ToolTip="24-hour clock, HH:mm — e.g. 16:30 for 4:30 PM, 03:00 for 3 AM"/>
+            <TextBlock Text="Time zone:" Style="{StaticResource FieldLabel}"/>
+            <ComboBox Width="290" ItemsSource="{Binding TimeZones}" SelectedItem="{Binding SelectedTimeZone}"
+                      DisplayMemberPath="DisplayName"/>
+          </WrapPanel>
+          <TextBlock Style="{StaticResource Hint}"
+                     Text="Time is entered on the 24-hour clock (16:30 = 4:30 PM). It is wall-clock time in the selected time zone, evaluated by Azure Automation — NOT the VM's local time and not UTC (unless you pick UTC). Azure requires the first run to be at least ~6 minutes in the future."/>
+
+          <WrapPanel Margin="0,6">
+            <TextBlock Text="Frequency:" Style="{StaticResource FieldLabel}" Margin="0,0,4,0"/>
+            <ComboBox Width="105" ItemsSource="{Binding Frequencies}" SelectedItem="{Binding Frequency}"/>
+            <TextBlock Text="Every:" Style="{StaticResource FieldLabel}"/>
+            <TextBox Width="40" Text="{Binding Interval}"
+                     ToolTip="Interval in units of the frequency (e.g. 2 = every 2 weeks). Ignored for Once."/>
+            <TextBlock Text="Expires (optional):" Style="{StaticResource FieldLabel}"/>
+            <DatePicker SelectedDate="{Binding ExpiryDate}" Width="125"
+                        ToolTip="Last day the schedule may fire; leave empty for no expiry"/>
+          </WrapPanel>
+
+          <!-- Monthly recurrence (mirrors the Azure portal) -->
+          <StackPanel Margin="0,2" Visibility="{Binding IsMonthly, Converter={StaticResource BoolToVis}}">
+            <WrapPanel>
+              <TextBlock Text="Monthly occurrences:" Style="{StaticResource FieldLabel}" Margin="0,0,4,0"/>
+              <ComboBox Width="160" ItemsSource="{Binding MonthlyModes}" SelectedItem="{Binding MonthlyMode}"/>
+
+              <StackPanel Orientation="Horizontal"
+                          Visibility="{Binding IsMonthDayMode, Converter={StaticResource BoolToVis}}">
+                <TextBlock Text="Days of month:" Style="{StaticResource FieldLabel}"/>
+                <TextBox Width="130" Text="{Binding MonthDaysText, UpdateSourceTrigger=PropertyChanged}"
+                         ToolTip="Comma-separated, e.g. 1,15,28"/>
+                <CheckBox Content="Also last day of month" IsChecked="{Binding RunOnLastDay}"
+                          VerticalAlignment="Center" Margin="10,0,0,0" FontSize="12"/>
+              </StackPanel>
+
+              <StackPanel Orientation="Horizontal"
+                          Visibility="{Binding IsMonthDayMode, Converter={StaticResource InverseBoolToVis}}">
+                <TextBlock Text="On the:" Style="{StaticResource FieldLabel}"/>
+                <ComboBox Width="90" ItemsSource="{Binding OccurrenceOptions}" SelectedItem="{Binding SelectedOccurrence}"/>
+                <ComboBox Width="110" Margin="6,0,0,0" ItemsSource="{Binding OccurrenceDays}"
+                          SelectedItem="{Binding SelectedOccurrenceDay}"/>
+              </StackPanel>
+            </WrapPanel>
+            <TextBlock Style="{StaticResource Hint}"
+                       Text="Days that don't exist in a month (e.g. 31 in April) are skipped by Azure — tick 'last day of month' for end-of-month runs."/>
+          </StackPanel>
+
+          <WrapPanel Margin="0,2" Visibility="{Binding IsWeekly, Converter={StaticResource BoolToVis}}">
+            <TextBlock Text="On days:" Style="{StaticResource FieldLabel}" Margin="0,0,6,0"/>
+            <ItemsControl ItemsSource="{Binding WeekDays}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <WrapPanel/>
+                </ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <CheckBox Content="{Binding Label}" IsChecked="{Binding IsChecked}" Margin="0,0,10,0" FontSize="12"/>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <TextBlock Text="(none ticked = the start date's weekday)" Style="{StaticResource Hint}" Margin="6,0,0,0"/>
+          </WrapPanel>
+
+          <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+            <Button Content="⏱  Create Schedule" Style="{StaticResource Button.Hero}"
+                    Command="{Binding CreateScheduleCommand}"/>
+          </StackPanel>
+        </StackPanel>
+      </Border>
+
+      <!-- ═══ Existing schedules ═══ -->
+      <Border Grid.Row="2" Style="{StaticResource Panel.Banner}" Background="White"
+              BorderBrush="{StaticResource Brush.BorderLight}" Margin="0,0,0,10">
+        <StackPanel>
+          <Grid Margin="0,0,0,4">
+            <TextBlock Text="Existing schedules" Style="{StaticResource Text.SectionHeader}" Margin="0"/>
+            <Button Content="Refresh" Style="{StaticResource Button.Tool}" HorizontalAlignment="Right"
+                    Command="{Binding RefreshSchedulesCommand}"/>
+          </Grid>
+          <DataGrid ItemsSource="{Binding Schedules}" IsReadOnly="True" MaxHeight="220" SelectionMode="Single">
+            <DataGrid.Columns>
+              <DataGridTextColumn Header="Schedule" Binding="{Binding ScheduleName}" Width="*"/>
+              <DataGridTextColumn Header="Frequency" Binding="{Binding Frequency}" Width="140"/>
+              <DataGridTextColumn Header="Next Run" Binding="{Binding NextRun, StringFormat='{}{0:yyyy-MM-dd HH:mm}'}" Width="150"/>
+              <DataGridTemplateColumn Width="80">
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate>
+                    <Button Content="Delete" Style="{StaticResource Button.Tool}" FontSize="11" Padding="6,1"
+                            Command="{Binding DataContext.DeleteScheduleCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                            CommandParameter="{Binding}"/>
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+            </DataGrid.Columns>
+          </DataGrid>
+          <TextBlock Style="{StaticResource Hint}"
+                     Text="Scheduled runs execute under the Automation identity; their output lives in the Automation account's Jobs blade in the Azure portal, not in this app's local history."/>
+        </StackPanel>
+      </Border>
+
+      <!-- ═══ Log ═══ -->
+      <Border Grid.Row="3" BorderBrush="{StaticResource Brush.Border}" BorderThickness="1" CornerRadius="3">
+        <TextBox x:Name="LogBox" Style="{StaticResource Input.Log}"
+                 Text="{Binding LogText, Mode=OneWay}" TextChanged="LogBox_TextChanged"/>
+      </Border>
+    </Grid>
+  </ScrollViewer>
+</UserControl>
