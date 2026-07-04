@@ -49,6 +49,11 @@
               SelectionMode="Extended">
       <DataGrid.Columns>
         <DataGridTemplateColumn Width="36" CanUserResize="False">
+          <DataGridTemplateColumn.Header>
+            <CheckBox x:Name="ChkAllVisible" HorizontalAlignment="Center"
+                      Checked="SelectAll_Checked" Unchecked="SelectAll_Unchecked"
+                      ToolTip="Select / clear all VISIBLE VMs (respects the current filters)"/>
+          </DataGridTemplateColumn.Header>
           <DataGridTemplateColumn.CellTemplate>
             <DataTemplate>
               <CheckBox IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}"

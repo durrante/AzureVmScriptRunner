@@ -35,7 +35,7 @@ public abstract partial class ExecutionHostViewModel : ObservableObject
     private bool _hasSelection;
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(CancelCommand))]
+    [NotifyCanExecuteChangedFor(nameof(CancelCommand), nameof(ClearOutputCommand))]
     private bool _isRunning;
 
     [ObservableProperty]
@@ -138,6 +138,16 @@ public abstract partial class ExecutionHostViewModel : ObservableObject
     }
 
     partial void OnIsRunningChanged(bool value) => OnRunningChanged(value);
+
+    private bool CanClearOutput() => !IsRunning;
+
+    [RelayCommand(CanExecute = nameof(CanClearOutput))]
+    private void ClearOutput()
+    {
+        Rows.Clear();
+        _logBuilder.Clear();
+        LogText = string.Empty;
+    }
 
     private bool CanCancel() => IsRunning;
 

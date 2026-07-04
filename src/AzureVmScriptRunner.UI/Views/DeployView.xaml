@@ -122,6 +122,9 @@
         <Button Content="Save as Task" Style="{StaticResource Button.Tool}" Margin="8,0,0,0"
                 Command="{Binding SaveAsTaskCommand}"
                 ToolTip="Save this deployment as a reusable task on the Tasks page"/>
+        <Button Content="Clear Output" Style="{StaticResource Button.Tool}" Margin="8,0,0,0"
+                Command="{Binding ClearOutputCommand}"
+                ToolTip="Clears the results grid and activity log (history is unaffected)"/>
         <ProgressBar Width="140" Height="6" Margin="12,0,0,0" VerticalAlignment="Center"
                      IsIndeterminate="{Binding IsRunning}"
                      Visibility="{Binding IsRunning, Converter={StaticResource BoolToVis}}"/>

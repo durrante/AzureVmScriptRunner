@@ -216,14 +216,7 @@ public sealed partial class ScheduleViewModel : ObservableObject
 
     public async Task InitializeAsync()
     {
-        SourceOptions.Clear();
-        SourceOptions.Add(new ScheduleSourceOption("Custom PowerShell script", null));
-        foreach (var task in await _savedTasks.GetAllAsync())
-        {
-            SourceOptions.Add(new ScheduleSourceOption($"Task: {task.Name}", task));
-        }
-
-        SelectedSource = SourceOptions[0];
+        await RefreshSourcesAsync();
 
         // All subscriptions the user can see — the Automation account often lives in a
         // management subscription with no VMs in it.
@@ -251,6 +244,21 @@ public sealed partial class ScheduleViewModel : ObservableObject
         {
             await ScanEnvironmentsAsync();
         }
+    }
+
+    /// <summary>Rebuilds the task source list (called when tasks change), keeping the current pick.</summary>
+    public async Task RefreshSourcesAsync()
+    {
+        var previous = SelectedSource?.Label;
+
+        SourceOptions.Clear();
+        SourceOptions.Add(new ScheduleSourceOption("Custom PowerShell script", null));
+        foreach (var task in await _savedTasks.GetAllAsync())
+        {
+            SourceOptions.Add(new ScheduleSourceOption($"Task: {task.Name}", task));
+        }
+
+        SelectedSource = SourceOptions.FirstOrDefault(o => o.Label == previous) ?? SourceOptions[0];
     }
 
     partial void OnShowAllAccountsChanged(bool value) => _ = ScanEnvironmentsAsync();

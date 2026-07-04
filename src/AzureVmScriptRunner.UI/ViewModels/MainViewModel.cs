@@ -68,6 +68,7 @@ public sealed partial class MainViewModel : ObservableObject
     private RunViewModel? _run;
     private DeployViewModel? _deploy;
     private TasksViewModel? _tasks;
+    private ScheduleViewModel? _schedule;
 
     public MainViewModel()
     {
@@ -109,13 +110,20 @@ public sealed partial class MainViewModel : ObservableObject
             _run = new RunViewModel(orchestrator, vms, session.UserPrincipalName, SetStatus);
             _deploy = new DeployViewModel(
                 orchestrator, vms, session.UserPrincipalName, SetStatus,
-                savedTasks, () => _tasks!.RefreshAsync());
+                savedTasks, async () =>
+                {
+                    await _tasks!.RefreshAsync();
+                    if (_schedule is not null)
+                    {
+                        await _schedule.RefreshSourcesAsync();
+                    }
+                });
             _tasks = new TasksViewModel(
                 savedTasks, session.UserPrincipalName, LoadTaskIntoRunner, SetStatus);
             await _tasks.RefreshAsync();
 
             var history = new HistoryViewModel(services.GetRequiredService<IJobHistoryService>());
-            var schedule = new ScheduleViewModel(
+            _schedule = new ScheduleViewModel(
                 services.GetRequiredService<IScheduleService>(),
                 savedTasks,
                 services.GetRequiredService<IVmDiscoveryService>(),
@@ -129,14 +137,14 @@ public sealed partial class MainViewModel : ObservableObject
             NavItems.Insert(2, new NavItem("Deploy", "", _deploy));
             NavItems.Insert(3, new NavItem("Tasks", "", _tasks));
             NavItems.Insert(4, new NavItem("History", "", history));
-            NavItems.Insert(5, new NavItem("Schedule", "", schedule));
+            NavItems.Insert(5, new NavItem("Schedule", "", _schedule));
 
             SelectedNavItem = NavItems[0];
             IsReady = true;
             StatusText = "Connected — loading VM inventory...";
             await vms.RefreshCommand.ExecuteAsync(null);
             await history.RefreshAsync();
-            await schedule.InitializeAsync();
+            await _schedule.InitializeAsync();
         }
         catch (Exception ex)
         {
@@ -166,6 +174,29 @@ public sealed partial class MainViewModel : ObservableObject
         }
     }
 
+    /// <summary>Drops the signed-in session and returns the app to its pre-Connect state.</summary>
+    [RelayCommand]
+    private void Disconnect()
+    {
+        for (var i = NavItems.Count - 1; i >= 0; i--)
+        {
+            if (NavItems[i].ViewModel is not PrepViewModel)
+            {
+                NavItems.RemoveAt(i);
+            }
+        }
+
+        _run = null;
+        _deploy = null;
+        _tasks = null;
+        _schedule = null;
+        UserDisplay = string.Empty;
+        IsConnected = false;
+        IsReady = false;
+        SelectedNavItem = NavItems[0];
+        StatusText = "Disconnected — click Connect to sign in.";
+    }
+
     partial void OnSelectedNavItemChanged(NavItem? value)
     {
         CurrentView = value?.ViewModel;
@@ -174,6 +205,12 @@ public sealed partial class MainViewModel : ObservableObject
         if (value?.ViewModel is HistoryViewModel history)
         {
             _ = history.RefreshAsync();
+        }
+
+        // Tasks saved elsewhere (task editor, Deploy 'Save as Task') appear without a restart.
+        if (value?.ViewModel is ScheduleViewModel schedule)
+        {
+            _ = schedule.RefreshSourcesAsync();
         }
     }
 }

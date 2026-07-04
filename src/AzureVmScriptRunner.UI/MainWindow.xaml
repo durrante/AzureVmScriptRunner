@@ -46,8 +46,6 @@
             </TextBlock>
           </StackPanel>
         </StackPanel>
-        <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="12"
-                   Foreground="White" Text="{Binding UserDisplay}"/>
       </Grid>
     </Border>
 
@@ -81,10 +79,15 @@
             </TextBlock.Style>
           </TextBlock>
         </StackPanel>
-        <Button Content="Connect to Azure" HorizontalAlignment="Right"
-                Style="{StaticResource Button.Primary}"
-                Command="{Binding ConnectCommand}"
-                Visibility="{Binding IsConnected, Converter={StaticResource InverseBoolToVis}}"/>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+          <Button Content="Connect to Azure" Style="{StaticResource Button.Primary}"
+                  Command="{Binding ConnectCommand}"
+                  Visibility="{Binding IsConnected, Converter={StaticResource InverseBoolToVis}}"/>
+          <Button Content="Disconnect" Style="{StaticResource Button.Tool}" Margin="0"
+                  Command="{Binding DisconnectCommand}"
+                  Visibility="{Binding IsConnected, Converter={StaticResource BoolToVis}}"
+                  ToolTip="Signs out of this session and returns to the disconnected state"/>
+        </StackPanel>
       </Grid>
     </Border>
 
