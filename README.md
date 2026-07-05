@@ -73,7 +73,7 @@ It's fully portable and self-contained: no installer, no .NET runtime required, 
 
 1. **Connect**: click *Connect to Azure* and sign in with your Entra ID account (browser prompt, every launch, by design).
 2. **Prep**: read this page first; it's the built-in setup guide covering everything in [Permissions](#permissions) below with copy-paste commands.
-3. **VMs**: refresh discovery, filter/search, tick the VMs you want to target. The selection follows you to every other page and is always shown as chips so you can see exactly what you're about to hit.
+3. **VMs**: refresh discovery, filter/search, tick the VMs you want to target. The selection follows you to every other page, with each selected VM listed by name at the top so you can see exactly what you're about to hit.
 4. **Run**: pick PowerShell or CMD, write your script, set timeout/parallelism, *Run on Selected VMs*, confirm the target list. Watch per-VM results and the live log.
 5. **Deploy**: paste the blob URL of a zipped PSADT package (plain https URL, **no SAS token**), choose Install/Uninstall/Repair and deploy mode (Silent recommended, scripts run as SYSTEM in session 0), deploy. *Save as Task* makes it reusable.
 6. **Tasks**: run anything from the library via *Load into Run / Deploy* (nothing executes directly from the Tasks page; you always review targets and confirm).
